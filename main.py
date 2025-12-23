@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+import card_manager
+import player
 
 # Example file showing a basic pygame "game loop"
 import pygame
@@ -26,9 +28,9 @@ def board_draw():
 def stat_draw():
     x = 580
     y = 20
-    for i in range(NumberOfPlayers):
+    for i in range(number_of_players):
         pygame.draw.rect(screen, (60,110,200), (x, y, 200, 60))
-        text = font.render(f"Gracz {str(i+1)}: {punkty[i]}", True, (255, 255, 255))
+        text = font.render(f"{players_list[i].name}: {players_list[i].get_all_points()}", True, (255, 255, 255))
         screen.blit(text, (x+10, y+20))
         y+=80
 
@@ -50,7 +52,8 @@ board = [["","","","","","",""],
          ["","","","","","",""]]
 
 #dostępny karty
-classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
+#moved to card_manager class
+#classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
 
 #wgrywanie obrazków
 card_img = pygame.image.load("images/temp.jpg").convert_alpha() # dla img z transparencją
@@ -69,17 +72,25 @@ kwadrat2 = pygame.Rect(300,300,300,300) #pozycjja, wymiary
 kolizja = kwadrat1.colliderect(kwadrat2) #zwraca true or false
 pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle to draw
 
-#miejsce za potrzebne zmienne
-NumberOfPlayers = 4
-punkty = [0,0,0,0]
-font = pygame.font.Font(None, size=30)
-decks = []
+#miejsce na potrzebne zmienne
 
-for i in range(NumberOfPlayers):
-    deck = []
-    for j in range(15):
-        deck.append(classes[random.randint(1, 100)%7])
-    decks.append(deck)
+players_list = []
+for i in range(4):
+    p = player.Player("Gracz " + str(i+1), i, (0, i * 50, 0))
+    players_list.append(p)
+
+number_of_players = len(players_list)
+
+#punkty = [0,0,0,0]
+font = pygame.font.Font(None, size=30)
+#decks = []
+
+# moved to card_manager class
+# for i in range(NumberOfPlayers):
+#     deck = []
+#     for j in range(15):
+#         deck.append(classes[random.randint(1, 100)%7])
+#     decks.append(deck)
 
 
 while running:
