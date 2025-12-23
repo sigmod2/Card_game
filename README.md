@@ -1,1 +1,1 @@
-# shallow_card_game
+# card_game - bez shallow
