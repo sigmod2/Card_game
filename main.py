@@ -117,6 +117,7 @@ def board_draw():
 
 
 STAT_BACKGROUND_COLOR = (60,110,200)
+STAT_BACKGROUND_SIZE_CURRENT_PLAYER_COLOR = (200,200,200)
 STAT_CELL_SIZE = (200, 60) # it is real size
 STAT_CELL_MARGIN = 30
 
@@ -124,7 +125,10 @@ def stat_draw():
     x = 580
     y = 20
     for i in range(number_of_players):
-        pygame.draw.rect(screen, STAT_BACKGROUND_COLOR, (x, y, STAT_CELL_SIZE[0], STAT_CELL_SIZE[1]))
+        color = STAT_BACKGROUND_COLOR
+        if current_player.index == i:
+            color = STAT_BACKGROUND_SIZE_CURRENT_PLAYER_COLOR
+        pygame.draw.rect(screen, color, (x, y, STAT_CELL_SIZE[0], STAT_CELL_SIZE[1]))
         text = FONT.render(f"{players_list[i].name}: {players_list[i].get_all_points()}", True, players_list[i].color)
         screen.blit(text, (x+10, y+20))
         y+=STAT_CELL_MARGIN + STAT_CELL_SIZE[1]
@@ -132,17 +136,29 @@ def stat_draw():
 
 
 
+is_mouse_pressed = False
 
 def end_turn_draw():
-    pygame.draw.rect(screen, (200,50,0), (640, 480, 80, 80))
+    rect = pygame.Rect(640, 480, 80, 80)
+
+    global is_mouse_pressed
+    if rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0] and not is_mouse_pressed:
+        end_turn()
+        is_mouse_pressed = True
+    if not pygame.mouse.get_pressed()[0]:
+        is_mouse_pressed = False
+
+    pygame.draw.rect(screen, (200,50,0), rect)
 
 def end_turn():
     global current_player
+    card_manager.refill_deck(current_player)
     current_player_index = current_player.index
     current_player_index += 1
     if current_player_index == number_of_players:
         current_player_index = 0
     current_player = players_list[current_player_index]
+
     ...
 
 
