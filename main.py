@@ -1,8 +1,8 @@
 import pygame
 import random
 import math
-import card_manager
-import player
+from card_manager import CardManager, Card
+from player import Player
 
 # Example file showing a basic pygame "game loop"
 import pygame
@@ -13,17 +13,51 @@ screen = pygame.display.set_mode((800, 720))
 clock = pygame.time.Clock()
 running = True
 
+
+
+
+
+
 #miejsce na funkcje w kodzie
 def board_draw():
     x, y = 0, 0
     color = (0,0,0)
+    tiles_rects = []
     for i in range(7):
         x=i*80
         for j in range(7):
             y=j*80
             if (j%2==0 and i%2==0) or (i%2==1 and j%2==1): color = (200,200,200)
             else: color = (100,100,100)
-            pygame.draw.rect(screen, color, (x , y, 78, 78))
+            if not card_manager.is_tile_free(i, j):
+                # if on the tile is any card use the player color for tile
+                color = card_manager.board[i][j].player.color
+
+            tile_rect = pygame.Rect(x, y, 78, 78)
+            tiles_rects.append(tile_rect)
+            if tile_rect.collidepoint(pygame.mouse.get_pos()):
+                # the mouse is colliding with the tile
+
+                if card_manager.is_tile_free(i, j):
+                    color = (255, 255, 255)
+
+            pygame.draw.rect(screen, color, tile_rect)
+
+            if not card_manager.is_tile_free(i, j):
+                # on the tile is any card
+                card_image = pygame.image.load(card_manager.board[i][j].image_name)
+                card_image = pygame.transform.scale(card_image, (70, 70))
+                screen.blit(card_image, (x + 4, y + 4))
+
+
+
+
+
+
+
+
+
+
 
 def stat_draw():
     x = 580
@@ -42,18 +76,9 @@ def end_turn():
 def cards_draw():
     pass
 
-#plansza gry
-board = [["","","","","","",""],
-         ["","","","","","",""],
-         ["","","","","","",""],
-         ["","","","","","",""],
-         ["","","","","","",""],
-         ["","","","","","",""],
-         ["","","","","","",""]]
 
-#dostępny karty
-#moved to card_manager class
-#classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
+
+
 
 #wgrywanie obrazków
 card_img = pygame.image.load("images/temp.jpg").convert_alpha() # dla img z transparencją
@@ -76,25 +101,28 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 
 players_list = []
 for i in range(4):
-    p = player.Player("Gracz " + str(i+1), i, (0, i * 50, 0))
+    p = Player("Gracz " + str(i+1), i, (0, i * 50, 0))
     players_list.append(p)
 
 number_of_players = len(players_list)
 
-#punkty = [0,0,0,0]
-font = pygame.font.Font(None, size=30)
-#decks = []
+card_manager = CardManager(players_list)
 
-# moved to card_manager class
-# for i in range(NumberOfPlayers):
-#     deck = []
-#     for j in range(15):
-#         deck.append(classes[random.randint(1, 100)%7])
-#     decks.append(deck)
+#temp for debug
+card_manager.board[0][0] = Card(players_list[0], 'archer', 0, 0)
+card_manager.board[1][0] = Card(players_list[0], 'healer', 1, 0)
+card_manager.board[2][2] = Card(players_list[1], 'healer', 2, 2)
+# end
+
+
+font = pygame.font.Font(None, size=30)
+
+
 
 
 while running:
     screen.fill((255, 238, 177))  # miejsce na board_draw()
+
 
     board_draw()
     stat_draw()
@@ -102,6 +130,8 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+
 
     # flip() przeniesienie modyfikacji powierzchni screen na display
     pygame.display.flip()
