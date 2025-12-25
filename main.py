@@ -7,25 +7,13 @@ from player import Player
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((800, 720))
+screen = pygame.display.set_mode((800, 800))
 clock = pygame.time.Clock()
 running = True
 
 
 
 # Constants
-TILE_SIZE = 80
-TILE_MARGIN = 2
-TILE_IMAGE_MARGIN = 4
-TILE_ORDINAL_NUMBER_MARGIN = 30
-TILE_ORDINAL_NUMBER_TEXT_COLOR = (0, 0, 0)
-TILE_COLOR_DARK = (100, 100, 100)
-TILE_COLOR_LIGHT = (200, 200, 200)
-TILE_COLOR_MOUSE_COLLIDE = (255, 255, 255)
-BACKGROUND_COLOR = (255, 238, 177)
-BOARD_BACKGROUND_COLOR = (255, 223, 108)
-BOARD_SIZE = TILE_SIZE * 7 + TILE_ORDINAL_NUMBER_MARGIN
-
 FONT = pygame.font.Font(None, size=30)
 
 
@@ -38,9 +26,14 @@ for i in range(4):
     players_list.append(p)
 
 number_of_players = len(players_list)
-
+current_player = players_list[0]
 
 card_manager = CardManager(players_list)
+card_manager.initialise_cards()
+card_manager.shuffle_cards()
+for i in range(number_of_players):
+    card_manager.refill_deck(players_list[i])
+
 #temp for debug
 card_manager.board[0][0] = Card(players_list[0], 'archer', 0, 0)
 card_manager.board[1][0] = Card(players_list[0], 'healer', 1, 0)
@@ -58,8 +51,19 @@ card_manager.board[2][2] = Card(players_list[1], 'healer', 2, 2)
 
 
 
+BOARD_DESTINATION = (10, 10)
+TILE_SIZE = 80# real size of tile is TILE_SIZE - TILE_MARGIN
+TILE_MARGIN = 2
+TILE_IMAGE_MARGIN = 4
+TILE_ORDINAL_NUMBER_MARGIN = 30
+TILE_ORDINAL_NUMBER_TEXT_COLOR = (0, 0, 0)
+TILE_COLOR_DARK = (100, 100, 100)
+TILE_COLOR_LIGHT = (200, 200, 200)
+TILE_COLOR_MOUSE_COLLIDE = (255, 255, 255)
+BACKGROUND_COLOR = (255, 238, 177)
+BOARD_BACKGROUND_COLOR = (255, 223, 108)
+BOARD_SIZE = TILE_SIZE * 7 + TILE_ORDINAL_NUMBER_MARGIN
 
-#miejsce na funkcje w kodzie
 def board_draw():
     board = pygame.Surface((BOARD_SIZE, BOARD_SIZE), pygame.SRCALPHA)
     board.fill(BOARD_BACKGROUND_COLOR)
@@ -78,7 +82,8 @@ def board_draw():
                 color = card_manager.board[i][j].player.color
 
             tile_rect = pygame.Rect(x, y, TILE_SIZE - TILE_MARGIN, TILE_SIZE - TILE_MARGIN)
-            if tile_rect.collidepoint(pygame.mouse.get_pos()):
+            normalized_mouse_position = (pygame.mouse.get_pos()[0] - BOARD_DESTINATION[0], pygame.mouse.get_pos()[1] - BOARD_DESTINATION[1]) # it is required because when i use new surface it use different coordinations system than mouse
+            if tile_rect.collidepoint(normalized_mouse_position):
                 # the mouse is colliding with the tile
 
                 if card_manager.is_tile_free(i, j):
@@ -102,7 +107,7 @@ def board_draw():
             else:
                 board.blit(text, (TILE_ORDINAL_NUMBER_MARGIN + (TILE_SIZE / 3) + (j * TILE_SIZE), TILE_ORDINAL_NUMBER_MARGIN / 3))
 
-    screen.blit(board, (10, 10))
+    screen.blit(board, BOARD_DESTINATION)
 
 
 
@@ -111,24 +116,64 @@ def board_draw():
 
 
 
-
+STAT_BACKGROUND_COLOR = (60,110,200)
+STAT_CELL_SIZE = (200, 60) # it is real size
+STAT_CELL_MARGIN = 30
 
 def stat_draw():
     x = 580
     y = 20
     for i in range(number_of_players):
-        pygame.draw.rect(screen, (60,110,200), (x, y, 200, 60))
+        pygame.draw.rect(screen, STAT_BACKGROUND_COLOR, (x, y, STAT_CELL_SIZE[0], STAT_CELL_SIZE[1]))
         text = FONT.render(f"{players_list[i].name}: {players_list[i].get_all_points()}", True, players_list[i].color)
         screen.blit(text, (x+10, y+20))
-        y+=80
+        y+=STAT_CELL_MARGIN + STAT_CELL_SIZE[1]
+
+
+
+
 
 def end_turn_draw():
     pygame.draw.rect(screen, (200,50,0), (640, 480, 80, 80))
+
 def end_turn():
-    pass
+    global current_player
+    current_player_index = current_player.index
+    current_player_index += 1
+    if current_player_index == number_of_players:
+        current_player_index = 0
+    current_player = players_list[current_player_index]
+    ...
+
+
+DECK_DESTINATION = (50, 620)
+DECK_CARD_SIZE = 100 # this is real size
+DECK_MARGIN = 10
 
 def cards_draw():
-    pass
+    hand = pygame.Surface((DECK_CARD_SIZE * 5 + DECK_MARGIN * 5, DECK_CARD_SIZE + DECK_MARGIN))
+    hand.fill(BACKGROUND_COLOR)
+
+    for i in range(len(card_manager.decks[current_player.index])):
+        rect = pygame.Rect(i * DECK_CARD_SIZE + i * DECK_MARGIN + DECK_MARGIN/2, DECK_MARGIN/2, DECK_CARD_SIZE, DECK_CARD_SIZE + DECK_MARGIN)
+        image = pygame.image.load(card_manager.decks[current_player.index][i].image_name)
+
+        normalized_mouse_position = (pygame.mouse.get_pos()[0] - DECK_DESTINATION[0], pygame.mouse.get_pos()[1] - DECK_DESTINATION[1])
+        if rect.collidepoint(normalized_mouse_position):
+            image = pygame.transform.scale(image, (DECK_CARD_SIZE + DECK_MARGIN, DECK_CARD_SIZE + DECK_MARGIN))
+            rect.x -= DECK_MARGIN / 2
+            rect.y -= DECK_MARGIN / 2
+        else:
+            image = pygame.transform.scale(image, (DECK_CARD_SIZE, DECK_CARD_SIZE))
+
+
+        hand.blit(image, (rect.x, rect.y))
+
+
+
+
+    ...
+    screen.blit(hand, DECK_DESTINATION)
 
 
 
@@ -164,6 +209,7 @@ while running:
 
     board_draw()
     stat_draw()
+    cards_draw()
     end_turn_draw()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:

@@ -6,7 +6,7 @@ import pygame
 from player import Player
 
 
-
+MAX_NUMBER_OF_CARDS_IN_DECK = 5
 
 
 class Card:
@@ -36,6 +36,14 @@ class Card:
             'healer' : 1,
             'mage' : 2,
             'pikeman' : 3
+        }
+
+        self.reversed_class_names_dict = {
+            -1: 'None',
+            0: 'archer',
+            1: 'healer',
+            2: 'mage',
+            3: 'pikeman'
         }
 
         self.player: Player = player
@@ -71,6 +79,12 @@ class Card:
         self.set_class_by_index(self.class_names_dict[image_name])
 
 
+    def __repr__(self):
+        '''
+        It is for human-readable representation when printing this class
+        '''
+        return "Card: \"" + str(self.player) + "\" " + self.reversed_class_names_dict[self.card_class]
+
 
 
 
@@ -87,10 +101,9 @@ class CardManager:
 
         self.card_classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
 
-    def shuffle_cards(self, card_list):
+    def shuffle_cards(self):
         '''
-        Shuffle the given list of cards.
-        :return:
+        Shuffle the self.other_cards list of cards
         '''
         ...
 
@@ -98,9 +111,26 @@ class CardManager:
     def initialise_cards(self):
         '''
         Create all card and put them in the self.other_cards list.
-        :return:
         '''
-        ...
+        amount_of_specific_cards = {
+            'archer': 2,
+            'healer': 10,
+            'mage': 4,
+            'pikeman': 10
+        }
+
+        for card_class, amount in amount_of_specific_cards.items():
+            for i in range(amount):
+                self.other_cards.append(Card(card_class=card_class))
+
+
+
+    def refill_deck(self, player: Player):
+        while len(self.decks[player.index]) < MAX_NUMBER_OF_CARDS_IN_DECK or len(self.other_cards) == 0:
+            self.decks[player.index].append(self.other_cards[0])
+            self.other_cards.pop(0)
+
+
 
 
     def get_player_cards_on_board(self, player: Player):
@@ -164,9 +194,14 @@ if __name__ == "__main__":
 
 
     aaa = CardManager(players_list)
+    aaa.initialise_cards()
+    aaa.decks[0].append(Card(players_list[0]))
+    aaa.refill_deck(players_list[0])
+    print(aaa.decks[0])
 
     aaa.board[0][0] = Card(players_list[0], 'mage', 0, 0)
     print(aaa.board[0][0].image_name)
+    print(aaa.board[0][1])
     aaa.board[0][1] = Card()
     aaa.board[0][2] = Card()
 
