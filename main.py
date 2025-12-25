@@ -4,8 +4,6 @@ import math
 from card_manager import CardManager, Card
 from player import Player
 
-# Example file showing a basic pygame "game loop"
-import pygame
 
 # pygame setup
 pygame.init()
@@ -15,40 +13,96 @@ running = True
 
 
 
+# Constants
+TILE_SIZE = 80
+TILE_MARGIN = 2
+TILE_IMAGE_MARGIN = 4
+TILE_ORDINAL_NUMBER_MARGIN = 30
+TILE_ORDINAL_NUMBER_TEXT_COLOR = (0, 0, 0)
+TILE_COLOR_DARK = (100, 100, 100)
+TILE_COLOR_LIGHT = (200, 200, 200)
+TILE_COLOR_MOUSE_COLLIDE = (255, 255, 255)
+BACKGROUND_COLOR = (255, 238, 177)
+BOARD_BACKGROUND_COLOR = (255, 223, 108)
+BOARD_SIZE = TILE_SIZE * 7 + TILE_ORDINAL_NUMBER_MARGIN
+
+FONT = pygame.font.Font(None, size=30)
+
+
+
+# Variables
+players_list = []
+players_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)] # temporal list
+for i in range(4):
+    p = Player("Gracz " + str(i+1), i, players_colors[i])
+    players_list.append(p)
+
+number_of_players = len(players_list)
+
+
+card_manager = CardManager(players_list)
+#temp for debug
+card_manager.board[0][0] = Card(players_list[0], 'archer', 0, 0)
+card_manager.board[1][0] = Card(players_list[0], 'healer', 1, 0)
+card_manager.board[2][2] = Card(players_list[1], 'healer', 2, 2)
+# end
+
+
+
+
+
+
+
+
+
+
 
 
 
 #miejsce na funkcje w kodzie
 def board_draw():
-    x, y = 0, 0
+    board = pygame.Surface((BOARD_SIZE, BOARD_SIZE), pygame.SRCALPHA)
+    board.fill(BOARD_BACKGROUND_COLOR)
+
+    x, y = TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE, TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE
     color = (0,0,0)
-    tiles_rects = []
     for i in range(7):
-        x=i*80
+        x += TILE_SIZE
+        y = TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE
         for j in range(7):
-            y=j*80
-            if (j%2==0 and i%2==0) or (i%2==1 and j%2==1): color = (200,200,200)
-            else: color = (100,100,100)
+            y += TILE_SIZE
+            if (j%2==0 and i%2==0) or (i%2==1 and j%2==1): color = TILE_COLOR_DARK
+            else: color = TILE_COLOR_LIGHT
             if not card_manager.is_tile_free(i, j):
                 # if on the tile is any card use the player color for tile
                 color = card_manager.board[i][j].player.color
 
-            tile_rect = pygame.Rect(x, y, 78, 78)
-            tiles_rects.append(tile_rect)
+            tile_rect = pygame.Rect(x, y, TILE_SIZE - TILE_MARGIN, TILE_SIZE - TILE_MARGIN)
             if tile_rect.collidepoint(pygame.mouse.get_pos()):
                 # the mouse is colliding with the tile
 
                 if card_manager.is_tile_free(i, j):
-                    color = (255, 255, 255)
+                    color = TILE_COLOR_MOUSE_COLLIDE
 
-            pygame.draw.rect(screen, color, tile_rect)
+            pygame.draw.rect(board, color, tile_rect)
 
             if not card_manager.is_tile_free(i, j):
                 # on the tile is any card
                 card_image = pygame.image.load(card_manager.board[i][j].image_name)
-                card_image = pygame.transform.scale(card_image, (70, 70))
-                screen.blit(card_image, (x + 4, y + 4))
+                card_image = pygame.transform.scale(card_image, (TILE_SIZE - TILE_MARGIN - 2 * TILE_IMAGE_MARGIN, TILE_SIZE - TILE_MARGIN - 2 * TILE_IMAGE_MARGIN))
+                board.blit(card_image, (x + TILE_IMAGE_MARGIN, y + TILE_IMAGE_MARGIN))
 
+
+    # show ordinal numbers of tiles
+    for i in range(2):
+        for j in range(7):
+            text = FONT.render(str(j + 1), True, TILE_ORDINAL_NUMBER_TEXT_COLOR)
+            if i == 0:
+                board.blit(text, (TILE_ORDINAL_NUMBER_MARGIN / 3, TILE_ORDINAL_NUMBER_MARGIN + (TILE_SIZE / 3) + (j * TILE_SIZE)))
+            else:
+                board.blit(text, (TILE_ORDINAL_NUMBER_MARGIN + (TILE_SIZE / 3) + (j * TILE_SIZE), TILE_ORDINAL_NUMBER_MARGIN / 3))
+
+    screen.blit(board, (10, 10))
 
 
 
@@ -64,7 +118,7 @@ def stat_draw():
     y = 20
     for i in range(number_of_players):
         pygame.draw.rect(screen, (60,110,200), (x, y, 200, 60))
-        text = font.render(f"{players_list[i].name}: {players_list[i].get_all_points()}", True, (255, 255, 255))
+        text = FONT.render(f"{players_list[i].name}: {players_list[i].get_all_points()}", True, players_list[i].color)
         screen.blit(text, (x+10, y+20))
         y+=80
 
@@ -97,25 +151,9 @@ kwadrat2 = pygame.Rect(300,300,300,300) #pozycjja, wymiary
 kolizja = kwadrat1.colliderect(kwadrat2) #zwraca true or false
 pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle to draw
 
-#miejsce na potrzebne zmienne
-
-players_list = []
-for i in range(4):
-    p = Player("Gracz " + str(i+1), i, (0, i * 50, 0))
-    players_list.append(p)
-
-number_of_players = len(players_list)
-
-card_manager = CardManager(players_list)
-
-#temp for debug
-card_manager.board[0][0] = Card(players_list[0], 'archer', 0, 0)
-card_manager.board[1][0] = Card(players_list[0], 'healer', 1, 0)
-card_manager.board[2][2] = Card(players_list[1], 'healer', 2, 2)
-# end
 
 
-font = pygame.font.Font(None, size=30)
+
 
 
 
