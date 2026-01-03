@@ -3,6 +3,7 @@ The file contain the player class, in which you can store all player data but no
 '''
 
 import pygame
+import copy
 
 class Player:
     def __init__(self, name: str, index: int, color: (int, int, int)):
@@ -36,3 +37,18 @@ class Player:
 
     def __repr__(self):
         return self.name
+'''
+def test():
+    lista = [["a","b","c"],
+             ["d","e","f"],
+             ["g","h","i"]]
+    kopia = copy.deepcopy(lista)
+    for i in range(3):
+        for j in range(3):
+            lista[i][j] = kopia[2-j][2-i]
+    print(lista[0])
+    print(lista[1])
+    print(lista[2])
+
+test()
+'''

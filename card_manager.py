@@ -4,7 +4,7 @@ The file contain the whole card management and data containers for cards.
 
 import pygame
 from player import Player
-
+import random
 
 MAX_NUMBER_OF_CARDS_IN_DECK = 5
 
@@ -16,12 +16,14 @@ class Card:
             card_class: int | str = -1,
             row: int = -1,
             column: int = -1,
+            is_selected: bool = False
     ):
         '''
         :param player: Player object to whom the card belongs
         :param card_class: int index of class or string name of class. Recommended value in string.
         :param row: number between 0-7 mean the board tile, the -1 is out of the board
         :param column: number between 0-7 mean the board tile, the -1 is out of the board
+        param selected to czy wybrana mowi i jest mi potrzebny
         '''
 
         self.images_list = [
@@ -30,6 +32,7 @@ class Card:
             "images\\Mage.png",
             "images\\Pikeman.png"
         ]
+        self.is_selected = False
 
         self.class_names_dict = {
             'archer' : 0,
@@ -86,9 +89,6 @@ class Card:
         return "Card: \"" + str(self.player) + "\" " + self.reversed_class_names_dict[self.card_class]
 
 
-
-
-
 class CardManager:
     def __init__(self, players: list[Player]):
         '''
@@ -97,15 +97,18 @@ class CardManager:
         self.board = [[None for i in range(7)] for j in range(7)]
         self.decks = [[] for i in range(len(players))]
         self.other_cards = []
-
-
         self.card_classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
 
     def shuffle_cards(self):
         '''
-        Shuffle the self.other_cards list of cards
+        Shuffle the self.other_cards list of cards  takie o napisalem, lepszego nie potrzeba
         '''
-        ...
+        for i in range(random.randint(5,10)):
+            for index in range(len(self.other_cards)):
+                num = random.randint(0, len(self.other_cards )-1)
+                memory = self.other_cards[index]
+                self.other_cards[index] = self.other_cards[num]
+                self.other_cards[num]  = memory
 
 
     def initialise_cards(self):
@@ -118,20 +121,15 @@ class CardManager:
             'mage': 4,
             'pikeman': 10
         }
-
         for card_class, amount in amount_of_specific_cards.items():
             for i in range(amount):
                 self.other_cards.append(Card(card_class=card_class))
-
-
+        self.shuffle_cards()
 
     def refill_deck(self, player: Player):
-        while len(self.decks[player.index]) < MAX_NUMBER_OF_CARDS_IN_DECK or len(self.other_cards) == 0:
+        while (len(self.decks[player.index]) < MAX_NUMBER_OF_CARDS_IN_DECK) or (len(self.other_cards) == 0):
             self.decks[player.index].append(self.other_cards[0])
             self.other_cards.pop(0)
-
-
-
 
     def get_player_cards_on_board(self, player: Player):
         '''
@@ -145,7 +143,6 @@ class CardManager:
                 if j is not None and j.player == player:
                     temp.append(j)
         return temp
-
 
     def get_neighboring_cards_of_position(self, row: int, column: int):
         '''
@@ -184,7 +181,7 @@ class CardManager:
             return False
 
 
-
+'''
 if __name__ == "__main__":
     players_list = []
     for i in range(4):
@@ -209,3 +206,4 @@ if __name__ == "__main__":
 
 
     print(aaa.board)
+'''

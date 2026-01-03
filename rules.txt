@@ -1,0 +1,7 @@
+1. Gracz z największą ilością punktów pod koniec gry wygrywa.
+2. Każdy ma mieć pod koniec tury 5 kart na ręce
+3. Healer dodaje co turę 1 punkt, sam jest wart 0 punktów
+4. Pikeman jest tyle co obecna ilość pikemanów na polu gry
+5. Archer jest wart 4 punkty, położony na planszę niszczy kartę wroga w sąsiedztwie (1)
+6. Mage jest wart tyle ile aktualnie najwięcej warta karta na planszy, położony niszczy wszystkie karty wroga w sąsiedztwie (1)
+7. 
