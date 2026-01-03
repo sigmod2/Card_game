@@ -280,9 +280,10 @@ def cards_draw():
             global CURRENTLY_SELECTED_CARD_DECK_INDEX
             global VALID_CARD_SELECTED
             if pygame.mouse.get_pressed()[0] and not card_manager.decks[current_player.index][i].is_selected:
+                image = pygame.transform.scale(image, (DECK_CARD_SIZE + DECK_MARGIN, DECK_CARD_SIZE + DECK_MARGIN))
                 card_manager.decks[current_player.index][i].is_selected = True
                 CURRENTLY_SELECTED_CARD = card_manager.decks[current_player.index][i]
-                CURRENTLY_SELECTED_CARD_DECK_INDEX = i #quasi dziala, tymczasowe
+                CURRENTLY_SELECTED_CARD_DECK_INDEX = i
                 VALID_CARD_SELECTED = True
             elif pygame.mouse.get_pressed()[0] and card_manager.decks[current_player.index][i].is_selected:
                 card_manager.decks[current_player.index][i].is_selected = False
