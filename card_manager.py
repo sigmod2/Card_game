@@ -30,7 +30,11 @@ class Card:
             "images\\Archer.png",
             "images\\Healer.png",
             "images\\Mage.png",
-            "images\\Pikeman.png"
+            "images\\Pikeman.png",
+            "images\\SecretAgent.png",
+            "images\\Trebuchet.png",
+            "images\\Cavalry.png",
+            "images\\temp.png"
         ]
         self.is_selected = False
 
@@ -38,7 +42,11 @@ class Card:
             'archer' : 0,
             'healer' : 1,
             'mage' : 2,
-            'pikeman' : 3
+            'pikeman' : 3,
+            'secretagent': 4,
+            'trebuchet': 5,
+            'cavalry': 6,
+            'temp': 7
         }
 
         self.reversed_class_names_dict = {
@@ -46,7 +54,11 @@ class Card:
             0: 'archer',
             1: 'healer',
             2: 'mage',
-            3: 'pikeman'
+            3: 'pikeman',
+            4: 'secretagent',
+            5: 'trebuchet',
+            6: 'cavalry',
+            7: 'temp'
         }
 
         self.player: Player = player
@@ -97,7 +109,7 @@ class CardManager:
         self.board = [[None for i in range(7)] for j in range(7)]
         self.decks = [[] for i in range(len(players))]
         self.other_cards = []
-        self.card_classes = ["Pikeman", "Miner", "Mage", "Archer", "Cannon", "Cavalery", "Healer"]
+        self.card_classes = ["Pikeman", "SecretAgent", "Mage", "Archer", "Trebuchet", "Cavalry", "Healer", "temp"]
 
     def shuffle_cards(self):
         '''
@@ -116,10 +128,13 @@ class CardManager:
         Create all card and put them in the self.other_cards list.
         '''
         amount_of_specific_cards = {
-            'archer': 2,
+            'archer': 8,
             'healer': 10,
             'mage': 4,
-            'pikeman': 10
+            'pikeman': 10,
+            'secretagent': 6,
+            'trebuchet': 8,
+            'cavalry': 18
         }
         for card_class, amount in amount_of_specific_cards.items():
             for i in range(amount):

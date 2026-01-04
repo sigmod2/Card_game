@@ -4,6 +4,7 @@ import math
 from card_manager import CardManager, Card
 from player import Player
 import copy
+from music import MusicManager
 
 # pygame setup
 pygame.init()
@@ -37,6 +38,9 @@ card_manager.initialise_cards()
 card_manager.shuffle_cards()
 for i in range(number_of_players):
     card_manager.refill_deck(players_list[i])
+
+#tu se wcisne obiekty
+music_manager = MusicManager('temp')
 
 #temp for debug
 '''
@@ -137,6 +141,7 @@ def board_draw():
                         CURRENTLY_SELECTED_CARD = None
                         CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
                         VALID_CARD_SELECTED = False
+                        music_manager.play_effect(0)
                     if not pygame.mouse.get_pressed()[0]:
                         is_mouse_pressed = False  #mega zawaliste rozwiązanie z tym is_mouse_pressed, super
 
@@ -250,7 +255,7 @@ def end_turn():
     current_player = players_list[current_player_index]
 
     card_manager.board = rotate(card_manager.board)
-
+    music_manager.play_effect(1)
 
 def rotate(n):
     unnecessary_copy = [[None] * 7 for _ in range(7)] #dupa sraka znalazlem w necie nwm czemu mi none samo nie dzialalo
@@ -314,6 +319,7 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 '''
 
 
+music_manager.play_music(3)
 while running:
     screen.fill((255, 238, 177))  # miejsce na board_draw()
 
@@ -325,8 +331,7 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    print(pygame.mouse.get_pressed()[0])
-    print(card_manager.other_cards)
+
     # flip() przeniesienie modyfikacji powierzchni screen na display
     pygame.display.flip()
 
