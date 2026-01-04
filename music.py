@@ -12,11 +12,14 @@ class MusicManager:
         self.effectstracks_list = [
             "music\\card-placement.mp3",
             "music\\flipcard.mp3"]
+
     def play_music(self, track_number: int):
         tracks = {}
         for i in range(len(self.soundtracks_list)):
             tracks[i] = pygame.mixer.Sound(self.soundtracks_list[i])
         tracks[track_number].play()
+
+
     '''na razie tak, zmodyfikuje to wszystko tak, zeby jak skonczy sie grac jeden soundtrack to zaczynal nastepny'''
     def play_effect(self, effect_number: int):
         effects = {}

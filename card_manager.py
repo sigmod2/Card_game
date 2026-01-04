@@ -139,7 +139,7 @@ class CardManager:
         for card_class, amount in amount_of_specific_cards.items():
             for i in range(amount):
                 self.other_cards.append(Card(card_class=card_class))
-        self.shuffle_cards()
+
 
     def refill_deck(self, player: Player):
         while (len(self.decks[player.index]) < MAX_NUMBER_OF_CARDS_IN_DECK) or (len(self.other_cards) == 0):

@@ -99,6 +99,7 @@ BOARD_SIZE = TILE_SIZE * 7 + TILE_ORDINAL_NUMBER_MARGIN
 CURRENTLY_SELECTED_CARD = None   #ważne w chuj, wszystko na tym stoi
 CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
 VALID_CARD_SELECTED = False
+CARD_HAS_BEEN_PLACED = False
 
 def board_draw():
     '''
@@ -131,12 +132,17 @@ def board_draw():
                     global is_mouse_pressed
                     global CURRENTLY_SELECTED_CARD
                     global CURRENTLY_SELECTED_CARD_DECK_INDEX
-                    if pygame.mouse.get_pressed()[0] and not is_mouse_pressed and VALID_CARD_SELECTED:
-                        is_mouse_pressed = True
+                    global CARD_HAS_BEEN_PLACED
+
+                    if pygame.mouse.get_pressed()[0] and not is_mouse_pressed and VALID_CARD_SELECTED and is_valid(i,j, current_player) and not CARD_HAS_BEEN_PLACED:
+                        is_mouse_pressed = True                                      #tutaj kladziona jest karta
                         card_manager.board[i][j] = CURRENTLY_SELECTED_CARD
                         CURRENTLY_SELECTED_CARD.is_selected = False
                         card_manager.decks[current_player.index].pop(CURRENTLY_SELECTED_CARD_DECK_INDEX)
                         card_manager.board[i][j].player = current_player #assigment playera bo potrzebne do kolorów, tymaczoswe
+                        CARD_HAS_BEEN_PLACED = True
+                        print(i, j)
+                        print(type(card_manager.board[i][j]))
 
                         CURRENTLY_SELECTED_CARD = None
                         CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
@@ -256,6 +262,8 @@ def end_turn():
 
     card_manager.board = rotate(card_manager.board)
     music_manager.play_effect(1)
+    global CARD_HAS_BEEN_PLACED
+    CARD_HAS_BEEN_PLACED = False
 
 def rotate(n):
     unnecessary_copy = [[None] * 7 for _ in range(7)] #dupa sraka znalazlem w necie nwm czemu mi none samo nie dzialalo
@@ -298,6 +306,17 @@ def cards_draw():
         hand.blit(image, (rect.x, rect.y))
     screen.blit(hand, DECK_DESTINATION)
 
+def is_valid(i: int, j: int, current_player):
+    if i==3 and j==6: return True
+    if j!=6:
+        if (type(card_manager.board[i][j+1]) == Card) and (card_manager.board[i][j+1].player == current_player): return True
+    if j!=0:
+        if (type(card_manager.board[i][j-1]) == Card) and (card_manager.board[i][j-1].player == current_player): return True
+    if i!=0:
+        if (type(card_manager.board[i-1][j]) == Card) and (card_manager.board[i-1][j].player == current_player): return True
+    if i!=6:
+        if (type(card_manager.board[i+1][j]) == Card) and (card_manager.board[i+1][j].player == current_player): return True
+    return False
 '''
 #wgrywanie obrazków
 card_img = pygame.image.load("images/temp.jpg").convert_alpha() # dla img z transparencją
@@ -318,7 +337,6 @@ kolizja = kwadrat1.colliderect(kwadrat2) #zwraca true or false
 pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle to draw
 '''
 
-
 music_manager.play_music(3)
 while running:
     screen.fill((255, 238, 177))  # miejsce na board_draw()
@@ -332,6 +350,7 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+   # print(card_manager.board)
     # flip() przeniesienie modyfikacji powierzchni screen na display
     pygame.display.flip()
 
