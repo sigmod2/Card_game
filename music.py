@@ -11,7 +11,10 @@ class MusicManager:
             "music\\The Heathen.mp3"]
         self.effectstracks_list = [
             "music\\card-placement.mp3",
-            "music\\flipcard.mp3"]
+            "music\\flipcard.mp3",
+            "music\\arrow_hit.mp3",
+            "music\\fireball.mp3",
+            "music\\trebuchet.mp3"]
 
     def play_music(self, track_number: int):
         tracks = {}

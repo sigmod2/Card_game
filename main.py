@@ -107,6 +107,11 @@ CURRENTLY_SELECTED_CARD = None   #ważne w chuj, wszystko na tym stoi
 CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
 VALID_CARD_SELECTED = False
 CARD_HAS_BEEN_PLACED = False
+another_usless_variable = -1
+coords = [-1, -1]
+
+global DESTRUCTION
+DESTRUCTION = 0
 
 def board_draw():
     '''
@@ -114,6 +119,8 @@ def board_draw():
     '''
     board = pygame.Surface((BOARD_SIZE, BOARD_SIZE), pygame.SRCALPHA)
     board.fill(BOARD_BACKGROUND_COLOR)
+
+
 
     x, y = TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE, TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE
     color = (0,0,0)
@@ -132,11 +139,14 @@ def board_draw():
             tile_rect = pygame.Rect(x, y, TILE_SIZE - TILE_MARGIN, TILE_SIZE - TILE_MARGIN)
             normalized_mouse_position = (pygame.mouse.get_pos()[0] - BOARD_DESTINATION[0], pygame.mouse.get_pos()[1] - BOARD_DESTINATION[1]) # it is required because when I use new surface it use different coordinate system than mouse
             if tile_rect.collidepoint(normalized_mouse_position):
+                global DESTRUCTION
+                global is_mouse_pressed
+                global coords
+                global another_usless_variable
                 # the mouse is colliding with the tile
                 if card_manager.is_tile_free(i, j):
                     color = TILE_COLOR_MOUSE_COLLIDE
                     global VALID_CARD_SELECTED
-                    global is_mouse_pressed
                     global CURRENTLY_SELECTED_CARD
                     global CURRENTLY_SELECTED_CARD_DECK_INDEX
                     global CARD_HAS_BEEN_PLACED
@@ -148,6 +158,18 @@ def board_draw():
                         card_manager.decks[current_player.index].pop(CURRENTLY_SELECTED_CARD_DECK_INDEX)
                         card_manager.board[i][j].player = current_player #asigment playera bo potrzebne do kolorów, tymaczoswe
                         CARD_HAS_BEEN_PLACED = True
+                        if CURRENTLY_SELECTED_CARD.card_class == 0:
+                            DESTRUCTION = 1
+                            coords = [i, j]
+                            another_usless_variable = 0
+                        if CURRENTLY_SELECTED_CARD.card_class == 2:
+                            DESTRUCTION = 3
+                            coords = [i, j]
+                            another_usless_variable = 2
+                        if CURRENTLY_SELECTED_CARD.card_class == 5:
+                            DESTRUCTION = 1
+                            coords = [i, j]
+                            another_usless_variable = 5
                         points_manager.recount_points()
 
                         print(card_manager.board[i][j].player.index)
@@ -158,7 +180,21 @@ def board_draw():
                         music_manager.play_effect(0)
                     if not pygame.mouse.get_pressed()[0]:
                         is_mouse_pressed = False  #mega zawaliste rozwiązanie z tym is_mouse_pressed, super
-
+                    #klikamy nie zeby postawic ale zeby zniszczyc
+                else:
+                    if pygame.mouse.get_pressed()[0] and DESTRUCTION > 0 and not is_mouse_pressed and destroable(i, j, coords):
+                        is_mouse_pressed = True
+                        card_manager.board[i][j] = None
+                        DESTRUCTION -=1
+                        points_manager.recount_points()
+                        if another_usless_variable == 0:
+                            music_manager.play_effect(2)
+                        elif another_usless_variable == 2:
+                            music_manager.play_effect(3)
+                        elif another_usless_variable == 5:
+                            music_manager.play_effect(4)
+                    if not pygame.mouse.get_pressed()[0]:
+                        is_mouse_pressed = False
 
             # draw tile
             pygame.draw.rect(board, color, tile_rect)
@@ -261,6 +297,9 @@ def end_turn_draw():
 
 def end_turn():
     global current_player
+    global DESTRUCTION
+    DESTRUCTION = 0
+
     card_manager.refill_deck(current_player)
     current_player_index = current_player.index #?
     current_player_index += 1
@@ -319,7 +358,7 @@ def cards_draw():
     screen.blit(hand, DECK_DESTINATION)
 
 def is_valid(i: int, j: int, current_player):
-    if (i==3 and j==6) or (CURRENTLY_SELECTED_CARD.card_class == 4): return True
+    if (i==3 and j==6): return True
     if j!=6:
         if (type(card_manager.board[i][j+1]) == Card) and (card_manager.board[i][j+1].player == current_player): return True
     if j!=0:
@@ -328,7 +367,30 @@ def is_valid(i: int, j: int, current_player):
         if (type(card_manager.board[i-1][j]) == Card) and (card_manager.board[i-1][j].player == current_player): return True
     if i!=6:
         if (type(card_manager.board[i+1][j]) == Card) and (card_manager.board[i+1][j].player == current_player): return True
+    if CURRENTLY_SELECTED_CARD != None:
+        if CURRENTLY_SELECTED_CARD.card_class == 4: return True
     return False
+
+def destroable(i, j, coords):
+    if another_usless_variable == 5:
+        try:
+            if ([i, j+2] == coords or [i, j+3] == coords or
+                [i, j-2] == coords or [i, j-3] == coords or
+                [i+2, j] == coords or [i+3, j] == coords or
+                [i-2, j] == coords or [i-3, j] == coords):
+                return True
+        except IndexError: pass
+        return False
+    else:
+        if j!=6:
+            if [i, j+1] == coords: return True
+        if j!=0:
+            if [i, j-1] == coords: return True
+        if i!=0:
+            if [i-1, j] == coords: return True
+        if i!=6:
+            if [i+1, j] == coords: return True
+        return False
 '''
 #wgrywanie obrazków
 card_img = pygame.image.load("images/temp.jpg").convert_alpha() # dla img z transparencją
