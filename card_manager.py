@@ -106,6 +106,7 @@ class CardManager:
         '''
         :param players_names: list of players
         '''
+        self.number_of_turns = 0
         self.board = [[None for i in range(7)] for j in range(7)]
         self.decks = [[] for i in range(len(players))]
         self.other_cards = []

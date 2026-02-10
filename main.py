@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+
+from points import PointsManager
 from card_manager import CardManager, Card
 from player import Player
 import copy
@@ -23,7 +25,7 @@ FONT = pygame.font.Font(None, size=30)
 
 # Variables
 players_list = []
-players_effects_list = []
+players_effects_list = [] #troche psuje c
 players_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)] # temporal list
 for i in range(4):
     p = Player("Gracz " + str(i+1), i, players_colors[i])
@@ -39,15 +41,19 @@ card_manager.shuffle_cards()
 for i in range(number_of_players):
     card_manager.refill_deck(players_list[i])
 
+points_manager = PointsManager(players_list, card_manager)
+
+
+
 #tu se wcisne obiekty
 music_manager = MusicManager('temp')
 
+
+
+
+
 #temp for debug
-'''
-card_manager.board[0][0] = Card(players_list[0], 'archer', 0, 0)
-card_manager.board[1][0] = Card(players_list[0], 'healer', 1, 0)
-card_manager.board[2][2] = Card(players_list[1], 'healer', 2, 2)
-''' # end chwile mi zajelo znalezienie tego co mi modyfikuje card_menager.board
+ # end chwile mi zajelo znalezienie tego co mi modyfikuje card_menager.board
 
 
 HEADLINE_HEIGHT = 30
@@ -55,7 +61,8 @@ GAME_NAME = "Card Game"
 HEADLINE_COLOR = (255, 255, 255)
 HEADLINE_R_L_MARGIN = 10
 
-headline_text_info = "Some stupid info placeholder"
+global headline_text_info
+headline_text_info = "Although all hope is lost, let the battle begin..."
 
 def headline_draw():
     '''
@@ -139,10 +146,11 @@ def board_draw():
                         card_manager.board[i][j] = CURRENTLY_SELECTED_CARD
                         CURRENTLY_SELECTED_CARD.is_selected = False
                         card_manager.decks[current_player.index].pop(CURRENTLY_SELECTED_CARD_DECK_INDEX)
-                        card_manager.board[i][j].player = current_player #assigment playera bo potrzebne do kolorów, tymaczoswe
+                        card_manager.board[i][j].player = current_player #asigment playera bo potrzebne do kolorów, tymaczoswe
                         CARD_HAS_BEEN_PLACED = True
-                        print(i, j)
-                        print(type(card_manager.board[i][j]))
+                        points_manager.recount_points()
+
+                        print(card_manager.board[i][j].player.index)
 
                         CURRENTLY_SELECTED_CARD = None
                         CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
@@ -265,6 +273,10 @@ def end_turn():
     global CARD_HAS_BEEN_PLACED
     CARD_HAS_BEEN_PLACED = False
 
+    card_manager.number_of_turns +=1
+    global headline_text_info
+    headline_text_info = f"The turn number {card_manager.number_of_turns//4}"
+
 def rotate(n):
     unnecessary_copy = [[None] * 7 for _ in range(7)] #dupa sraka znalazlem w necie nwm czemu mi none samo nie dzialalo
     for i in range(7):
@@ -307,7 +319,7 @@ def cards_draw():
     screen.blit(hand, DECK_DESTINATION)
 
 def is_valid(i: int, j: int, current_player):
-    if i==3 and j==6: return True
+    if (i==3 and j==6) or (CURRENTLY_SELECTED_CARD.card_class == 4): return True
     if j!=6:
         if (type(card_manager.board[i][j+1]) == Card) and (card_manager.board[i][j+1].player == current_player): return True
     if j!=0:
