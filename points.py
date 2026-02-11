@@ -33,13 +33,16 @@ class PointsManager:
                             self.players[index].current_points += 4
                             if 4 not in memory_thief: memory_thief.append(4)
                         elif self.card_manager.board[i][j].card_class == 1:
+                            print("debug")
                             if self.card_manager.number_of_turns%4 == index:
                                 self.hard_points[index] += 1
+                                self.players[index].current_points += 1
                             if 1 not in memory_thief: memory_thief.append(1)
                         elif self.card_manager.board[i][j].card_class == 2:
                             mages+=1
                         elif self.card_manager.board[i][j].card_class == 3:
                             num_of_infant +=1
+                            print("Infantry spotted, current num:", num_of_infant)
                         elif self.card_manager.board[i][j].card_class == 4:
                             for x in range(-2, 3):
                                 for y in range(-2, 3):
@@ -57,7 +60,9 @@ class PointsManager:
                             pass
                         elif self.card_manager.board[i][j].card_class == 7:
                             pass
+
             memory_thief.append(num_of_infant*num_of_infant)
             self.players[index].current_points+=num_of_infant*num_of_infant
             self.players[index].current_points += (informants*2)
             self.players[index].current_points += max(memory_thief)
+            print("player", index, "total num od cards:", test, "current points", self.players[index].current_points)
