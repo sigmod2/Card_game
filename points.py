@@ -23,27 +23,27 @@ class PointsManager:
             num_of_infant = 0
             test  = 0
             informants = 0
-            memory_thief = []
+
             mages = 0
             for i in range(7):
                 for j in range(7):
                     if self.card_manager.board[i][j] != None and self.card_manager.board[i][j].player.index == index:
                         test+=1
-                        if self.card_manager.board[i][j].card_class == 0:
+                        if self.card_manager.board[i][j].card_class == 0:    #archer
                             self.players[index].current_points += 4
-                            if 4 not in memory_thief: memory_thief.append(4)
-                        elif self.card_manager.board[i][j].card_class == 1:
+
+                        elif self.card_manager.board[i][j].card_class == 1:   #healer
                             print("debug")
                             if self.card_manager.number_of_turns%4 == index:
                                 self.hard_points[index] += 1
                                 self.players[index].current_points += 1
-                            if 1 not in memory_thief: memory_thief.append(1)
-                        elif self.card_manager.board[i][j].card_class == 2:
-                            mages+=1
-                        elif self.card_manager.board[i][j].card_class == 3:
+
+                        elif self.card_manager.board[i][j].card_class == 2:    #mage
+                            self.players[index].current_points += self.get_max_of_board()
+                        elif self.card_manager.board[i][j].card_class == 3:    #pikeman
                             num_of_infant +=1
                             print("Infantry spotted, current num:", num_of_infant)
-                        elif self.card_manager.board[i][j].card_class == 4:
+                        elif self.card_manager.board[i][j].card_class == 4:    #secret agent
                             for x in range(-2, 3):
                                 for y in range(-2, 3):
                                     try:
@@ -52,17 +52,26 @@ class PointsManager:
                                                 informants+=1
                                                 print("informant on",i+x, j+y)
                                     except IndexError: pass
-                            if informants*2 not in memory_thief: memory_thief.append(informants*2)
-                        elif self.card_manager.board[i][j].card_class == 5:
-                            self.players[index].current_points += 8
-                            if 8 not in memory_thief: memory_thief.append(8)
-                        elif self.card_manager.board[i][j].card_class == 6:
-                            pass
-                        elif self.card_manager.board[i][j].card_class == 7:
-                            pass
 
-            memory_thief.append(num_of_infant*num_of_infant)
-            self.players[index].current_points+=num_of_infant*num_of_infant
+                        elif self.card_manager.board[i][j].card_class == 5:   #trebuchet
+                            self.players[index].current_points += 8
+
+                        elif self.card_manager.board[i][j].card_class == 6:    #cavlary
+                            self.players[index].current_points += 7  #kawaleria daje 7 punktów i przyzywa swołocz
+
+                        elif self.card_manager.board[i][j].card_class == 7:    #temporary placement
+                            pass
+            #koniec sprawdzania planszy dla danego gracza.
+
+
+            self.players[index].current_points += (num_of_infant*num_of_infant)
             self.players[index].current_points += (informants*2)
-            self.players[index].current_points += max(memory_thief)
-            print("player", index, "total num od cards:", test, "current points", self.players[index].current_points)
+
+            print("player", index + 1, "total num od cards:", test, "current points", self.players[index].current_points)
+    def get_max_of_board(self):
+        memory_thief = []
+        for i in range(7):
+            for j in range(7):
+                # tutaj powinnismy sprawdzic wartosc kazdej karty i znalezc maksa
+                pass
+        return 0

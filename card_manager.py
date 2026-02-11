@@ -135,7 +135,8 @@ class CardManager:
             'pikeman': 10,
             'secretagent': 6,
             'trebuchet': 8,
-            'cavalry': 18
+            'cavalry': 18,
+            'temp': 15
         }
         for card_class, amount in amount_of_specific_cards.items():
             for i in range(amount):

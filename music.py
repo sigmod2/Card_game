@@ -1,4 +1,5 @@
 import pygame
+import time
 
 class MusicManager:
     def __init__(self, temp):
@@ -15,13 +16,19 @@ class MusicManager:
             "music\\arrow_hit.mp3",
             "music\\fireball.mp3",
             "music\\trebuchet.mp3"]
+        self.soundtracks_lenghts = [
+            110,
+            57,
+            77,
+            85,
+            188
+        ]
 
     def play_music(self, track_number: int):
         tracks = {}
         for i in range(len(self.soundtracks_list)):
             tracks[i] = pygame.mixer.Sound(self.soundtracks_list[i])
         tracks[track_number].play()
-
 
     '''na razie tak, zmodyfikuje to wszystko tak, zeby jak skonczy sie grac jeden soundtrack to zaczynal nastepny'''
     def play_effect(self, effect_number: int):
@@ -30,6 +37,17 @@ class MusicManager:
             effects[i] = pygame.mixer.Sound(self.effectstracks_list[i])
         effects[effect_number].play()
 
+    def play_background_music(self):
+        tracks = {}
+        num = 0
+        for i in range(len(self.soundtracks_list)):
+            tracks[i] = pygame.mixer.Sound(self.soundtracks_list[i])
+
+        while True:
+            tracks[num].play()
+            time.sleep(self.soundtracks_lenghts[num])
+            num+=1
+            if num == len(self.soundtracks_list): num = 0
 
 
     def paths(self):

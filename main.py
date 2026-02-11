@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import threading
 
 from points import PointsManager
 from card_manager import CardManager, Card
@@ -61,7 +62,7 @@ GAME_NAME = "Card Game"
 HEADLINE_COLOR = (255, 255, 255)
 HEADLINE_R_L_MARGIN = 10
 
-global headline_text_info
+
 headline_text_info = "Although all hope is lost, let the battle begin..."
 
 def headline_draw():
@@ -170,7 +171,6 @@ def board_draw():
                             DESTRUCTION = 1
                             coords = [i, j]
                             another_usless_variable = 5
-                        points_manager.recount_points()
 
                         print(card_manager.board[i][j].player.index)
 
@@ -183,10 +183,11 @@ def board_draw():
                     #klikamy nie zeby postawic ale zeby zniszczyc
                 else:
                     if pygame.mouse.get_pressed()[0] and DESTRUCTION > 0 and not is_mouse_pressed and destroable(i, j, coords):
+                        if card_manager.board[i][j].player == current_player: continue  # jezeli zostala wybrana karta tego samego gracza to nie moze zostac zniszczona.
                         is_mouse_pressed = True
                         card_manager.board[i][j] = None
                         DESTRUCTION -=1
-                        points_manager.recount_points()
+
                         if another_usless_variable == 0:
                             music_manager.play_effect(2)
                         elif another_usless_variable == 2:
@@ -299,6 +300,15 @@ def end_turn():
     global current_player
     global DESTRUCTION
     DESTRUCTION = 0
+    #istonty segment potrzebny do działania players effect list
+    old_score = [x.current_points for x in players_list]
+    points_manager.recount_points()
+    new_score = [x.current_points for x in players_list]
+    for i in range(len(players_list)):
+        x = ""
+        if new_score[i]-old_score[i] > 0: x="+"
+        players_effects_list[i] = x + str(new_score[i]-old_score[i])
+
 
     card_manager.refill_deck(current_player)
     current_player_index = current_player.index #?
@@ -410,8 +420,8 @@ kwadrat2 = pygame.Rect(300,300,300,300) #pozycjja, wymiary
 kolizja = kwadrat1.colliderect(kwadrat2) #zwraca true or false
 pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle to draw
 '''
+threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
-music_manager.play_music(3)
 while running:
     screen.fill((255, 238, 177))  # miejsce na board_draw()
 

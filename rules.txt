@@ -7,6 +7,6 @@
 /*niszczenie dziala, znowu mozna swoich rozwalac, natomiast jego wartosc dziala częsiowo*/
 7. Hard pointy to punkty przypisane do gracza, soft pointy to punkty przypsane do kart. /*zrobione*/
 8. Secret Agent jest wart tyle co ilość kart wroga w jego sąsiedztwie (2) * 2, można go stawiać wszędzie. /*zrobione*/
-9. Cavlary
+9. Cavlary jest warte 7 punktów, przyzwa pospolite ruszenie.
 10. Trebuchet niszczy kartę wroga w sąsiedztwie 2 lub 3 ale tylko w liniach prostych jest wart 8 punktów. /*zrobione*/
-11. Temp
+11. Pospolite ruszenie, jego połozenie nie traci ruchu, jest warte 2 punkty
