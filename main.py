@@ -113,6 +113,8 @@ coords = [-1, -1]
 
 global DESTRUCTION
 DESTRUCTION = 0
+drawing_mode = False
+killing_mode = False
 
 def board_draw():
     '''
@@ -121,7 +123,9 @@ def board_draw():
     board = pygame.Surface((BOARD_SIZE, BOARD_SIZE), pygame.SRCALPHA)
     board.fill(BOARD_BACKGROUND_COLOR)
 
-
+    global drawing_mode
+    global coords
+    global killing_mode
 
     x, y = TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE, TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE
     color = (0,0,0)
@@ -137,12 +141,13 @@ def board_draw():
                 color = card_manager.board[i][j].player.color #ja chcialem zrobic inne grafiki dla roznych graczy
                 #pass
 
+
+
             tile_rect = pygame.Rect(x, y, TILE_SIZE - TILE_MARGIN, TILE_SIZE - TILE_MARGIN)
             normalized_mouse_position = (pygame.mouse.get_pos()[0] - BOARD_DESTINATION[0], pygame.mouse.get_pos()[1] - BOARD_DESTINATION[1]) # it is required because when I use new surface it use different coordinate system than mouse
             if tile_rect.collidepoint(normalized_mouse_position):
                 global DESTRUCTION
                 global is_mouse_pressed
-                global coords
                 global another_usless_variable
                 # the mouse is colliding with the tile
                 if card_manager.is_tile_free(i, j):
@@ -161,22 +166,21 @@ def board_draw():
                         CARD_HAS_BEEN_PLACED = True
                         if CURRENTLY_SELECTED_CARD.card_class == 0:
                             DESTRUCTION = 1
-                            coords = [i, j]
-                            another_usless_variable = 0
                         if CURRENTLY_SELECTED_CARD.card_class == 2:
                             DESTRUCTION = 3
-                            coords = [i, j]
-                            another_usless_variable = 2
                         if CURRENTLY_SELECTED_CARD.card_class == 5:
                             DESTRUCTION = 1
+                        if CURRENTLY_SELECTED_CARD.card_class in [0, 2, 5]:
                             coords = [i, j]
-                            another_usless_variable = 5
+                            another_usless_variable = CURRENTLY_SELECTED_CARD.card_class
+                            killing_mode = True
 
                         print(card_manager.board[i][j].player.index)
                         if CURRENTLY_SELECTED_CARD.card_class == 6: CARD_HAS_BEEN_PLACED = False  #jezeli koń to możemy postawic jeszcze jdna kartę
                         CURRENTLY_SELECTED_CARD = None
                         CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
                         VALID_CARD_SELECTED = False
+                        drawing_mode = False
                         music_manager.play_effect(0)
 
                     if not pygame.mouse.get_pressed()[0]:
@@ -188,6 +192,7 @@ def board_draw():
                         is_mouse_pressed = True
                         card_manager.board[i][j] = None
                         DESTRUCTION -=1
+                        if DESTRUCTION == 0: killing_mode = False
 
                         if another_usless_variable == 0:
                             music_manager.play_effect(2)
@@ -198,11 +203,16 @@ def board_draw():
                     if not pygame.mouse.get_pressed()[0]:
                         is_mouse_pressed = False
 
+
+            if drawing_mode and is_valid(i, j, current_player) and card_manager.is_tile_free(i, j):
+                color = (255, 0, 123)
+
             # draw tile
             pygame.draw.rect(board, color, tile_rect)
 
             # draw card if it should
             if not card_manager.is_tile_free(i, j):
+
                 # on the tile is any card
                 card_image = pygame.image.load(card_manager.board[i][j].image_name)
                 card_image = pygame.transform.scale(card_image, (TILE_SIZE - TILE_MARGIN - 2 * TILE_IMAGE_MARGIN, TILE_SIZE - TILE_MARGIN - 2 * TILE_IMAGE_MARGIN))
@@ -319,6 +329,8 @@ def end_turn():
     global current_player
     global DESTRUCTION
     DESTRUCTION = 0
+    global killing_mode
+    killing_mode = False
     #istonty segment potrzebny do działania players effect list
     old_score = [x.current_points for x in players_list]
     points_manager.recount_points()
@@ -355,29 +367,35 @@ def rotate(n):
 DECK_DESTINATION = (50, 670)
 DECK_CARD_SIZE = 100 # this is real size
 DECK_MARGIN = 10
+CURRENTLY_SELECTED_CARD: Card = None
+CURRENTLY_SELECTED_CARD_DECK_INDEX = 0
+VALID_CARD_SELECTED = False
 
 def cards_draw():
     hand = pygame.Surface((DECK_CARD_SIZE * 5 + DECK_MARGIN * 5, DECK_CARD_SIZE + DECK_MARGIN))
     hand.fill(BACKGROUND_COLOR)
 
     for i in range(len(card_manager.decks[current_player.index])):
+        global CURRENTLY_SELECTED_CARD
+        global CURRENTLY_SELECTED_CARD_DECK_INDEX
+        global VALID_CARD_SELECTED
+        global drawing_mode
+
         rect = pygame.Rect(i * DECK_CARD_SIZE + i * DECK_MARGIN + DECK_MARGIN/2, DECK_MARGIN/2, DECK_CARD_SIZE, DECK_CARD_SIZE + DECK_MARGIN)
         image = pygame.image.load(card_manager.decks[current_player.index][i].image_name)
         normalized_mouse_position = (pygame.mouse.get_pos()[0] - DECK_DESTINATION[0], pygame.mouse.get_pos()[1] - DECK_DESTINATION[1])
-        if rect.collidepoint(normalized_mouse_position):
+        if rect.collidepoint(normalized_mouse_position) or (VALID_CARD_SELECTED and CURRENTLY_SELECTED_CARD_DECK_INDEX == i):
             image = pygame.transform.scale(image, (DECK_CARD_SIZE + DECK_MARGIN, DECK_CARD_SIZE + DECK_MARGIN))
             rect.x -= DECK_MARGIN / 2
             rect.y -= DECK_MARGIN / 2
 
-            global CURRENTLY_SELECTED_CARD
-            global CURRENTLY_SELECTED_CARD_DECK_INDEX
-            global VALID_CARD_SELECTED
             if pygame.mouse.get_pressed()[0] and not card_manager.decks[current_player.index][i].is_selected:
                 image = pygame.transform.scale(image, (DECK_CARD_SIZE + DECK_MARGIN, DECK_CARD_SIZE + DECK_MARGIN))
                 card_manager.decks[current_player.index][i].is_selected = True
                 CURRENTLY_SELECTED_CARD = card_manager.decks[current_player.index][i]
                 CURRENTLY_SELECTED_CARD_DECK_INDEX = i
                 VALID_CARD_SELECTED = True
+                drawing_mode = True
             elif pygame.mouse.get_pressed()[0] and card_manager.decks[current_player.index][i].is_selected:
                 card_manager.decks[current_player.index][i].is_selected = False
 
@@ -386,7 +404,7 @@ def cards_draw():
         hand.blit(image, (rect.x, rect.y))
     screen.blit(hand, DECK_DESTINATION)
 
-def is_valid(i: int, j: int, current_player):
+def is_valid(i: int, j: int, current_player: Player):
     if (i==3 and j==6): return True
     if j!=6:
         if (type(card_manager.board[i][j+1]) == Card) and (card_manager.board[i][j+1].player == current_player): return True
@@ -451,6 +469,7 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 #threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
 while running:
+    print(drawing_mode)
     if card_manager.number_of_turns // 4 == 20: game_end()
     else:
         screen.fill((255, 238, 177))  # miejsce na board_draw()

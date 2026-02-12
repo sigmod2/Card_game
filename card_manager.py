@@ -94,6 +94,10 @@ class Card:
         self.set_class_by_index(self.class_names_dict[image_name])
 
 
+
+
+
+
     def __repr__(self):
         '''
         It is for human-readable representation when printing this class
