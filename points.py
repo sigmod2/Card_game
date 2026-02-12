@@ -1,3 +1,5 @@
+from operator import index
+
 import pygame
 
 
@@ -70,8 +72,27 @@ class PointsManager:
             print("player", index + 1, "total num od cards:", test, "current points", self.players[index].current_points)
     def get_max_of_board(self):
         memory_thief = []
+        infantry_nums = [0, 0, 0, 0]
         for i in range(7):
             for j in range(7):
-                # tutaj powinnismy sprawdzic wartosc kazdej karty i znalezc maksa
-                pass
-        return 0
+                if self.card_manager.board[i][j] != None:
+                    if self.card_manager.board[i][j].card_class == 0: memory_thief.append(4)
+                    elif self.card_manager.board[i][j].card_class == 1: memory_thief.append(1)
+                    elif self.card_manager.board[i][j].card_class == 2: continue
+                    elif self.card_manager.board[i][j].card_class == 3:
+                        infantry_nums[self.card_manager.board[i][j].player.index] += 1
+                    elif self.card_manager.board[i][j].card_class == 4:
+                        innitial_value=0
+                        for x in range(-2, 3):
+                            for y in range(-2, 3):
+                                try:
+                                    if (i + x >= 0) and (j + y >= 0) and (abs(x) + abs(y) <= 2):
+                                        if (type(self.card_manager.board[i + x][j + y]) == Card) and \
+                                                self.card_manager.board[i + x][j + y].player.index != self.card_manager.board[i][j].player.index:
+                                            innitial_value+=1
+                                except IndexError: pass
+                        memory_thief.append(innitial_value*2)
+                    elif self.card_manager.board[i][j].card_class == 5: memory_thief.append(8)
+                    elif self.card_manager.board[i][j].card_class == 6: memory_thief.append(7)
+        memory_thief.append(max(infantry_nums))
+        return max(memory_thief) #napisałem z palca, myślę, że pomyślałem o wszystkim i powinno działać

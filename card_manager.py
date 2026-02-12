@@ -46,7 +46,7 @@ class Card:
             'secretagent': 4,
             'trebuchet': 5,
             'cavalry': 6,
-            'temp': 7
+            'temp': 0
         }
 
         self.reversed_class_names_dict = {
@@ -129,14 +129,14 @@ class CardManager:
         Create all card and put them in the self.other_cards list.
         '''
         amount_of_specific_cards = {
-            'archer': 8,
+            'archer': 10,
             'healer': 10,
             'mage': 4,
-            'pikeman': 10,
-            'secretagent': 6,
+            'pikeman': 20,
+            'secretagent': 8,
             'trebuchet': 8,
-            'cavalry': 18,
-            'temp': 15
+            'cavalry': 8,
+            'temp': 0
         }
         for card_class, amount in amount_of_specific_cards.items():
             for i in range(amount):

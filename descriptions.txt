@@ -1,0 +1,7 @@
+Archer can destroy enemy card within the range of 1. Value: 4p.
+Healer adds 1 point to the player every turn. Value 1p.
+Mage is able to destroy up to 3 cards within the range of 1. Receives value of the most valued card on board.
+Pikeman can cannot do much beside praying. Value: number of player's pikemans on board.
+Secret Agent can be placed anywhere on board. Value: number of enemy cards in range 2, times 2.
+Trebuchet easly eliminates enemies 2 or 3 squares away, but only in straight lines. Value: 7p.
+Calvary is so fast that you can play an additional card after it. Value: 8p.

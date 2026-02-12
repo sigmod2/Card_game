@@ -14,7 +14,7 @@ pygame.init()
 screen = pygame.display.set_mode((900, 800))
 clock = pygame.time.Clock()
 running = True
-pygame.display.set_caption('Losowy napis tymczasowy')
+pygame.display.set_caption('Seven cards - seven squares')
 icon = pygame.image.load('images//icon.png')
 pygame.display.set_icon(icon)
 
@@ -58,7 +58,7 @@ music_manager = MusicManager('temp')
 
 
 HEADLINE_HEIGHT = 30
-GAME_NAME = "Card Game"
+GAME_NAME = "Seven Cards / 7C"
 HEADLINE_COLOR = (255, 255, 255)
 HEADLINE_R_L_MARGIN = 10
 
@@ -173,11 +173,12 @@ def board_draw():
                             another_usless_variable = 5
 
                         print(card_manager.board[i][j].player.index)
-
+                        if CURRENTLY_SELECTED_CARD.card_class == 6: CARD_HAS_BEEN_PLACED = False  #jezeli koń to możemy postawic jeszcze jdna kartę
                         CURRENTLY_SELECTED_CARD = None
                         CURRENTLY_SELECTED_CARD_DECK_INDEX = -1
                         VALID_CARD_SELECTED = False
                         music_manager.play_effect(0)
+
                     if not pygame.mouse.get_pressed()[0]:
                         is_mouse_pressed = False  #mega zawaliste rozwiązanie z tym is_mouse_pressed, super
                     #klikamy nie zeby postawic ale zeby zniszczyc
@@ -279,11 +280,29 @@ def stat_draw():
 
 is_mouse_pressed = False
 
+descriptions = []
+f = open('descriptions.txt', 'r')
+for i in f:
+    descriptions.append(i.rstrip())
+print(descriptions)
+f.close()
+
+def description_draw():
+    font = pygame.font.Font(None, size=30)
+    text1 = font.render(f"Name: {CURRENTLY_SELECTED_CARD.reversed_class_names_dict[CURRENTLY_SELECTED_CARD.card_class]}", True, (0, 0, 0))
+    text2 = font.render(f"Description: {descriptions[CURRENTLY_SELECTED_CARD.card_class]}", True, (0,0,0))
+ #trzeba napisac funkcje sprawdzjaca dlugosc tekstu, zrobic nowy syrface, podzielic desc na slowa i sprawdzac dlugosc tekstu  czy wychodzi za boksa
+    screen.blit(text1, (620, 450))
+    screen.blit(text2, (620, 470))
+
 def end_turn_draw():
     '''
     Draw end turn  button
     '''
-    rect = pygame.Rect(640, 480, 80, 80)
+    rect = pygame.Rect(640, 680, 210, 80)  #zrobiłem na szybko i na oko i jest brzydko, trzeba będzie sie zajac pod koniec wyglądem
+    font = pygame.font.Font(None, size=40)
+    text = font.render("[ END TURN ]", True, (0,0,0))
+
 
     global is_mouse_pressed
     if rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0] and not is_mouse_pressed:
@@ -293,8 +312,8 @@ def end_turn_draw():
         is_mouse_pressed = False
 
     ...
-    pygame.draw.rect(screen, (200,50,0), rect)
-
+    pygame.draw.rect(screen, (100,50,0), rect)
+    screen.blit(text, (660, 700))
 
 def end_turn():
     global current_player
@@ -324,7 +343,7 @@ def end_turn():
 
     card_manager.number_of_turns +=1
     global headline_text_info
-    headline_text_info = f"The turn number {card_manager.number_of_turns//4}"
+    headline_text_info = f"The turn number {(card_manager.number_of_turns//4)+1}"
 
 def rotate(n):
     unnecessary_copy = [[None] * 7 for _ in range(7)] #dupa sraka znalazlem w necie nwm czemu mi none samo nie dzialalo
@@ -401,6 +420,11 @@ def destroable(i, j, coords):
         if i!=6:
             if [i+1, j] == coords: return True
         return False
+
+def game_end():
+    print("Gra dobiegła końca łamagi")
+
+
 '''
 #wgrywanie obrazków
 card_img = pygame.image.load("images/temp.jpg").convert_alpha() # dla img z transparencją
@@ -430,6 +454,8 @@ while running:
     stat_draw()
     cards_draw()
     end_turn_draw()
+    if VALID_CARD_SELECTED: description_draw()
+    if card_manager.number_of_turns//4 == 20: game_end()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
