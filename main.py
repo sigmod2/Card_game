@@ -422,7 +422,11 @@ def destroable(i, j, coords):
         return False
 
 def game_end():
-    print("Gra dobiegła końca łamagi")
+    screen.fill((0,0,0))
+    font = pygame.font.Font(None, size=30)
+    text = font.render("Wygrała Hiszpańska Inkwizycja - tego nikt sie nie spodziewał", True, (255,255,255))
+    screen.blit(text, (100, 300))
+
 
 
 '''
@@ -444,23 +448,25 @@ kwadrat2 = pygame.Rect(300,300,300,300) #pozycjja, wymiary
 kolizja = kwadrat1.colliderect(kwadrat2) #zwraca true or false
 pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle to draw
 '''
-threading.Thread(target=music_manager.play_background_music, daemon=True).start()
+#threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
 while running:
-    screen.fill((255, 238, 177))  # miejsce na board_draw()
+    if card_manager.number_of_turns // 4 == 20: game_end()
+    else:
+        screen.fill((255, 238, 177))  # miejsce na board_draw()
 
-    headline_draw()
-    board_draw()
-    stat_draw()
-    cards_draw()
-    end_turn_draw()
-    if VALID_CARD_SELECTED: description_draw()
-    if card_manager.number_of_turns//4 == 20: game_end()
+        headline_draw()
+        board_draw()
+        stat_draw()
+        cards_draw()
+        end_turn_draw()
+        if VALID_CARD_SELECTED: description_draw()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-   # print(card_manager.board)
+    # print(card_manager.board)
     # flip() przeniesienie modyfikacji powierzchni screen na display
     pygame.display.flip()
 
