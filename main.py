@@ -300,10 +300,19 @@ f.close()
 def description_draw():
     font = pygame.font.Font(None, size=30)
     text1 = font.render(f"Name: {CURRENTLY_SELECTED_CARD.reversed_class_names_dict[CURRENTLY_SELECTED_CARD.card_class]}", True, (0, 0, 0))
-    text2 = font.render(f"Description: {descriptions[CURRENTLY_SELECTED_CARD.card_class]}", True, (0,0,0))
- #trzeba napisac funkcje sprawdzjaca dlugosc tekstu, zrobic nowy syrface, podzielic desc na slowa i sprawdzac dlugosc tekstu  czy wychodzi za boksa
+    text2 = [x for x in descriptions[CURRENTLY_SELECTED_CARD.card_class].split(" ")]
+    shit = ""
+    new_shit = []
+    for k in text2:
+        if len(shit + k) < 22: shit+=k + " "  #randomowo 22 dałem
+        else:
+            new_shit.append(shit)
+            shit = k + " "
+    new_shit.append(shit)
+    #niewyobrażalnie topornie napisana funkcja zeby napisy nie wychodzily na ekran
     screen.blit(text1, (620, 450))
-    screen.blit(text2, (620, 470))
+    for l in range(len(new_shit)):
+        screen.blit((font.render(new_shit[l], True, (0,0,0))), (620, 470 + 20*l))
 
 def end_turn_draw():
     '''
@@ -442,7 +451,7 @@ def destroable(i, j, coords):
 def game_end():
     screen.fill((0,0,0))
     font = pygame.font.Font(None, size=30)
-    text = font.render("Wygrała Hiszpańska Inkwizycja - tego nikt sie nie spodziewał", True, (255,255,255))
+    text = font.render(f"Wyniki to {sorted([x.current_points for x in players_list])} wygrał {players_list[[x.current_points for x in players_list].index(max([x.current_points for x in players_list]))]}", True, (255,255,255))
     screen.blit(text, (100, 300))
 
 
