@@ -15,8 +15,9 @@ class PointsManager:
         self.card_manager = card_manager
         self.hard_points = [0,0,0,0]
 
-    def recount_points(self):
+        self.statistics = []
 
+    def recount_points(self):
         self.players[0].current_points = self.hard_points[0]
         self.players[1].current_points = self.hard_points[1]
         self.players[2].current_points = self.hard_points[2]
@@ -70,6 +71,8 @@ class PointsManager:
             self.players[index].current_points += (informants*2)
 
             print("player", index + 1, "total num od cards:", test, "current points", self.players[index].current_points)
+
+
     def get_max_of_board(self):
         memory_thief = []
         infantry_nums = [0, 0, 0, 0]

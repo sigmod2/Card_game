@@ -351,6 +351,7 @@ def end_turn():
         if new_score[i]-old_score[i] > 0: x="+"
         players_effects_list[i] = x + str(new_score[i]-old_score[i])
 
+    points_manager.statistics.append(new_score)
 
     card_manager.refill_deck(current_player)
     current_player_index = current_player.index #?
