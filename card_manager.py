@@ -132,14 +132,15 @@ class CardManager:
         '''
         Create all card and put them in the self.other_cards list.
         '''
+        multiplicator = 3
         amount_of_specific_cards = {
-            'archer': 10,
-            'healer': 10,
-            'mage': 4,
-            'pikeman': 20,
-            'secretagent': 8,
-            'trebuchet': 8,
-            'cavalry': 8,
+            'archer': 10 * multiplicator,
+            'healer': 10 * multiplicator,
+            'mage': 4 * multiplicator,
+            'pikeman': 20 * multiplicator,
+            'secretagent': 8 * multiplicator,
+            'trebuchet': 8  * multiplicator,
+            'cavalry': 8 * multiplicator,
             'temp': 0
         }
         for card_class, amount in amount_of_specific_cards.items():

@@ -111,7 +111,6 @@ CARD_HAS_BEEN_PLACED = False
 another_usless_variable = -1
 coords = [-1, -1]
 
-global DESTRUCTION
 DESTRUCTION = 0
 drawing_mode = False
 killing_mode = False
@@ -126,6 +125,7 @@ def board_draw():
     global drawing_mode
     global coords
     global killing_mode
+    global CARD_HAS_BEEN_PLACED
 
     x, y = TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE, TILE_ORDINAL_NUMBER_MARGIN - TILE_SIZE
     color = (0,0,0)
@@ -155,7 +155,7 @@ def board_draw():
                     global VALID_CARD_SELECTED
                     global CURRENTLY_SELECTED_CARD
                     global CURRENTLY_SELECTED_CARD_DECK_INDEX
-                    global CARD_HAS_BEEN_PLACED
+
 
                     if pygame.mouse.get_pressed()[0] and not is_mouse_pressed and VALID_CARD_SELECTED and is_valid(i,j, current_player) and not CARD_HAS_BEEN_PLACED:
                         is_mouse_pressed = True                                      #tutaj kladziona jest karta
@@ -204,9 +204,11 @@ def board_draw():
                         is_mouse_pressed = False
 
 
-            if drawing_mode and is_valid(i, j, current_player) and card_manager.is_tile_free(i, j):
+            if drawing_mode and is_valid(i, j, current_player) and card_manager.is_tile_free(i, j) and not CARD_HAS_BEEN_PLACED:
                 color = (255, 0, 123)
 
+            if killing_mode and destroable(i, j, coords) and (not card_manager.is_tile_free(i, j) and card_manager.board[i][j].player != current_player):
+                color = (255, 255, 255)
             # draw tile
             pygame.draw.rect(board, color, tile_rect)
 
@@ -478,7 +480,6 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 #threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
 while running:
-    print(drawing_mode)
     if card_manager.number_of_turns // 4 == 20: game_end()
     else:
         screen.fill((255, 238, 177))  # miejsce na board_draw()
