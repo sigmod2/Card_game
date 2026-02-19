@@ -18,11 +18,9 @@ class PointsManager:
         self.statistics = []
 
     def recount_points(self):
-        self.players[0].current_points = self.hard_points[0]
-        self.players[1].current_points = self.hard_points[1]
-        self.players[2].current_points = self.hard_points[2]
-        self.players[3].current_points = self.hard_points[3]
-        for index in range(4):
+        for i in range(len(self.players)):
+            self.players[i].current_points = self.hard_points[i]
+        for index in range(len(self.players)):
             num_of_infant = 0
             test  = 0
             informants = 0

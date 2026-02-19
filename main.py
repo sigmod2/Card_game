@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 import threading
+import colorsys
 
 from points import PointsManager
 from card_manager import CardManager, Card
@@ -14,6 +15,7 @@ pygame.init()
 screen = pygame.display.set_mode((900, 800))
 clock = pygame.time.Clock()
 running = True
+in_lobby = True
 pygame.display.set_caption('Seven cards - seven squares')
 icon = pygame.image.load('images//icon.png')
 pygame.display.set_icon(icon)
@@ -25,26 +27,17 @@ FONT = pygame.font.Font(None, size=30)
 
 
 # Variables
-players_list = []
-players_effects_list = [] #troche psuje c
-players_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0)] # temporal list
+players_list: list[Player] = []
+players_effects_list: list[str] = [] #troche psuje c
+number_of_players: int = 0
+current_player: Player = None
+card_manager: CardManager = None
+points_manager: PointsManager = None
+
+# initialise player list. It is needeed to name and edit colors for players in loby
 for i in range(4):
-    p = Player("Gracz " + str(i+1), i, players_colors[i])
+    p = Player("Gracz " + str(i + 1), i, (0, 0, 0))
     players_list.append(p)
-    players_effects_list.append("")
-
-number_of_players = len(players_list)
-current_player = players_list[0]
-
-card_manager = CardManager(players_list)
-card_manager.initialise_cards()
-card_manager.shuffle_cards()
-for i in range(number_of_players):
-    card_manager.refill_deck(players_list[i])
-
-points_manager = PointsManager(players_list, card_manager)
-
-
 
 #tu se wcisne obiekty
 music_manager = MusicManager('temp')
@@ -239,7 +232,7 @@ def board_draw():
 
 
 STAT_DESTINATION = (620, 80)
-STAT_BACKGROUND_COLOR = (60,110,200)
+STAT_BACKGROUND_COLOR = (200, 200, 120)
 STAT_BACKGROUND_COLOR_OF_CURRENT_PLAYER = (200, 200, 200)
 STAT_CELL_SIZE = (200, 60); '''It is real size'''
 STAT_CELL_MARGIN = 30
@@ -249,8 +242,6 @@ STAT_EFFECT_PLUS_COLOR = (0, 255, 0)
 STAT_EFFECT_MINUS_COLOR = (255, 0, 0)
 STAT_EFFECT_NEUTRAL_COLOR = (123, 123, 123)
 
-
-players_effects_list = ["-1", "+5", "0", "grfv"]; '''The list with extra text info which is displayed near the player statistics. It has three states: if the text for player start with {+}, {-}, or others it will be shown in different color'''
 
 def stat_draw():
     '''
@@ -360,14 +351,19 @@ def end_turn():
         current_player_index = 0
     current_player = players_list[current_player_index]
 
-    card_manager.board = rotate(card_manager.board)
+    rotations = 1
+    if card_manager.number_of_turns % number_of_players == 0:
+        rotations += 4 - number_of_players
+    for i in range(rotations):
+        card_manager.board = rotate(card_manager.board)
+
     music_manager.play_effect(1)
     global CARD_HAS_BEEN_PLACED
     CARD_HAS_BEEN_PLACED = False
 
     card_manager.number_of_turns +=1
     global headline_text_info
-    headline_text_info = f"The turn number {(card_manager.number_of_turns//4)+1}"
+    headline_text_info = f"The turn number {(card_manager.number_of_turns // number_of_players) + 1}"
 
 def rotate(n):
     unnecessary_copy = [[None] * 7 for _ in range(7)] #dupa sraka znalazlem w necie nwm czemu mi none samo nie dzialalo
@@ -458,6 +454,117 @@ def game_end():
     screen.blit(text, (100, 300))
 
 
+def start_battle():
+    """
+    The most important function
+    Initialize all necessary objects
+    """
+    global current_player
+    current_player = players_list[0]
+    # delete, if it is too much players
+    for i in players_list:
+        if i.name == "":
+            players_list.remove(i)
+
+    # reindex players
+    for p, i in zip(players_list, range(len(players_list))):
+        p.index = i
+    global number_of_players
+    number_of_players = len(players_list)
+
+    for i in range(number_of_players):
+        players_effects_list.append("0")
+    print(players_effects_list)
+
+    global card_manager
+    card_manager = CardManager(players_list)
+    card_manager.initialise_cards()
+    card_manager.shuffle_cards()
+    for i in range(number_of_players):
+        card_manager.refill_deck(players_list[i])
+
+    global points_manager
+    points_manager = PointsManager(players_list, card_manager)
+
+
+
+
+LOBBY_PLAYER_NAME_CELL_WIDTH = 300
+LOBBY_PLAYER_NAME_CELL_HEIGHT = 80
+LOBBY_PLAYER_NAME_COLOR_MARGIN = 10
+LOBBY_PLAYER_NAME_BACKGROUND_COLOR = (200, 200, 200)
+
+intercepted_text = "" # the text from keyboard input
+intercepted_text_unlock = False
+draw_color_palette = False
+
+def lobby_draw():
+    font = pygame.font.Font(None, size=50)
+    main_text = font.render("Name yourself and your foes:", True, (0, 0, 0))
+    screen.blit(main_text, (screen.get_width() / 2 - main_text.get_width() / 2, 50))
+    for i in range(4):
+        # player name
+        rect = pygame.Rect(screen.get_width() / 2 - LOBBY_PLAYER_NAME_CELL_WIDTH / 2, 150 + LOBBY_PLAYER_NAME_CELL_HEIGHT * 1.3 * i, LOBBY_PLAYER_NAME_CELL_WIDTH, LOBBY_PLAYER_NAME_CELL_HEIGHT)
+        global current_player
+        pygame.draw.rect(screen, players_list[i].color, rect)
+        rect_small = pygame.Rect(rect.left + LOBBY_PLAYER_NAME_COLOR_MARGIN, rect.top + LOBBY_PLAYER_NAME_COLOR_MARGIN, LOBBY_PLAYER_NAME_CELL_WIDTH - 2 * LOBBY_PLAYER_NAME_COLOR_MARGIN, LOBBY_PLAYER_NAME_CELL_HEIGHT - 2 * LOBBY_PLAYER_NAME_COLOR_MARGIN)
+        pygame.draw.rect(screen, LOBBY_PLAYER_NAME_BACKGROUND_COLOR, rect_small)
+
+        text = FONT.render(players_list[i].name, True, (0, 0, 0))
+        screen.blit(text, text.get_rect(center=rect.center))
+        global intercepted_text_unlock
+        if rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            current_player = players_list[i]
+            current_player.name = ""
+        # rename player
+        if current_player is not None and intercepted_text_unlock:
+            current_player.name += intercepted_text
+            intercepted_text_unlock = False
+
+        # player color
+        global draw_color_palette
+        color_rect = pygame.Rect(rect.right + 10, rect.top + 10, LOBBY_PLAYER_NAME_CELL_HEIGHT - 20, LOBBY_PLAYER_NAME_CELL_HEIGHT - 20)
+        pygame.draw.rect(screen, (255,255,255), color_rect) # TODO: change to image of color palette icon
+        if color_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0]:
+            current_player = players_list[i]
+            draw_color_palette = True
+
+        if draw_color_palette:
+            palette = pygame.image.load("images\\HSL.png")
+            palette = pygame.transform.scale(palette, (50, 400))
+            screen.blit(palette, (800, 50))
+            palette_rect = pygame.Rect(palette.get_rect().left + 800, palette.get_rect().top + 50, 50, 400)
+            if palette_rect.collidepoint(pygame.mouse.get_pos()) and pygame.mouse.get_pressed()[0] and current_player is not None:
+                hue = (pygame.mouse.get_pos()[1] - palette_rect.top) / 400
+                current_player.color = colorsys.hsv_to_rgb(hue, 1, 1)
+                current_player.color = (current_player.color[0] * 255, current_player.color[1] * 255, current_player.color[2] * 255)
+
+
+
+
+
+
+    # start battle button
+    start_battle_button_rect = pygame.Rect(screen.get_width() / 2 - 150, screen.get_height() - 120, 300, 100)
+    color = (255, 255, 255)
+    if start_battle_button_rect.collidepoint(pygame.mouse.get_pos()):
+        color = (200, 200, 200)
+        global in_lobby
+        if pygame.mouse.get_pressed()[0]:
+            # start battle
+            start_battle() # never delete it
+            in_lobby = False
+    pygame.draw.rect(screen, color, start_battle_button_rect)
+
+    start_battle_text = FONT.render("Let the battle begin...", True, (0, 0, 0))
+    screen.blit(start_battle_text, start_battle_text.get_rect(center=start_battle_button_rect.center))
+
+
+
+
+
+
+
 
 '''
 #wgrywanie obrazków
@@ -480,8 +587,13 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 '''
 #threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
+
+
 while running:
-    if card_manager.number_of_turns // 4 == 20: game_end()
+    if in_lobby:
+        screen.fill((255, 238, 177))
+        lobby_draw()
+    elif card_manager.number_of_turns // number_of_players == 20: game_end()
     else:
         screen.fill((255, 238, 177))  # miejsce na board_draw()
 
@@ -491,10 +603,12 @@ while running:
         cards_draw()
         end_turn_draw()
         if VALID_CARD_SELECTED: description_draw()
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYUP:
+            intercepted_text = event.unicode
+            intercepted_text_unlock = True
 
     # print(card_manager.board)
     # flip() przeniesienie modyfikacji powierzchni screen na display
