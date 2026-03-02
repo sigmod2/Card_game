@@ -448,10 +448,20 @@ def destroable(i, j, coords):
         return False
 
 def game_end():
-    screen.fill((0,0,0))
-    font = pygame.font.Font(None, size=30)
-    text = font.render(f"Wyniki to {sorted([x.current_points for x in players_list])} wygrał {players_list[[x.current_points for x in players_list].index(max([x.current_points for x in players_list]))]}", True, (255,255,255))
-    screen.blit(text, (100, 300))
+    screen.fill(BACKGROUND_COLOR)
+    #font = pygame.font.Font(None, size=30)
+    #text = font.render(f"Wyniki to {sorted([x.current_points for x in players_list])} wygrał {players_list[[x.current_points for x in players_list].index(max([x.current_points for x in players_list]))]}", True, (255,255,255))
+   # screen.blit(text, (100, 300))
+
+    results = sorted(players_list, key=lambda x: x.current_points, reverse=True)
+    font = pygame.font.Font(None, 50)
+    main_text = font.render(f"The {results[0].name} has won!", True, TILE_ORDINAL_NUMBER_TEXT_COLOR)
+    screen.blit(main_text, main_text.get_rect(centerx=screen.get_rect().centerx, top=50))
+
+    for i, result in enumerate(results):
+        text = FONT.render(result.name + ": " + str(result.get_all_points()), True, TILE_ORDINAL_NUMBER_TEXT_COLOR)
+        screen.blit(text, text.get_rect(centerx=screen.get_rect().centerx, top=i * 100 + 300))
+
 
 
 def start_battle():
@@ -518,7 +528,10 @@ def lobby_draw():
             current_player.name = ""
         # rename player
         if current_player is not None and intercepted_text_unlock:
-            current_player.name += intercepted_text
+            if intercepted_text == '': # backspace key
+                current_player.name = current_player.name[0:-1]
+            elif intercepted_text in "1234567890qwertyuiopasdfghjklzxcvbnmWERTYUIOPASDFGHJKLZXCVBNM": # symbols allowed to use in player name
+                current_player.name += intercepted_text
             intercepted_text_unlock = False
 
         # player color
@@ -587,7 +600,13 @@ pygame.draw.rect(screen,(100,100,100), kwadrat2) #surface, color, what rectangle
 '''
 #threading.Thread(target=music_manager.play_background_music, daemon=True).start()
 
-
+# while running:
+#     game_end()
+#     pygame.display.flip()
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             running = False
+# exit()
 
 while running:
     if in_lobby:

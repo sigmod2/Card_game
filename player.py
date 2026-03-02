@@ -14,7 +14,7 @@ class Player:
         '''
         self.name = name
         self.index = index
-        self.current_points = 10
+        self.current_points = 0
         self.extra_points = 0
 
         self.color = color
